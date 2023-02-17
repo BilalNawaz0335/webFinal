@@ -1,0 +1,102 @@
+<?php
+// Start the session
+session_start();
+
+// Connect to the database
+$servername = "localhost";
+$username = "username";
+$password = "password";
+$dbname = "database_name";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Signup operation
+if (isset($_POST['signup'])) {
+	// Retrieve form data
+	$firstname = mysqli_real_escape_string($conn, $_POST['firstname']);
+	$lastname = mysqli_real_escape_string($conn, $_POST['lastname']);
+	$email = mysqli_real_escape_string($conn, $_POST['email']);
+	$password = mysqli_real_escape_string($conn, $_POST['password']);
+	$confirm_password = mysqli_real_escape_string($conn, $_POST['confirm_password']);
+	$gender = mysqli_real_escape_string($conn, $_POST['gender']);
+	$semester = mysqli_real_escape_string($conn, $_POST['semester']);
+
+	// Check if passwords match
+	if ($password !== $confirm_password) {
+		$_SESSION['error'] = "Passwords do not match.";
+		header("Location: signup.php");
+		exit();
+	}
+
+	// Check if email already exists in the database
+	$sql = "SELECT * FROM studentdata WHERE email='$email'";
+	$result = $conn->query($sql);
+
+	if ($result->num_rows > 0) {
+		$_SESSION['error'] = "Email already exists.";
+		header("Location: signup.php");
+		exit();
+	}
+
+	// Insert form data into the database
+	$sql = "INSERT INTO studentdata (firstname, lastname, email, password, gender, semester) VALUES ('$firstname', '$lastname', '$email', '$password', '$gender', '$semester')";
+
+	if ($conn->query($sql) === TRUE) {
+		$_SESSION['success'] = "Signup successful.";
+		header("Location: dashboard.php");
+		exit();
+	} else {
+		$_SESSION['error'] = "Error: " . $sql . "<br>" . $conn->error;
+		header("Location: signup.php");
+		exit();
+	}
+}
+
+// Signin operation
+if (isset($_POST['signin'])) {
+	// Retrieve form data
+	$email = mysqli_real_escape_string($conn, $_POST['email']);
+	$password = mysqli_real_escape_string($conn, $_POST['password']);
+
+	// Check if email and password match in the database
+	$sql = "SELECT * FROM studentdata WHERE email='$email' AND password='$password'";
+	$result = $conn->query($sql);
+
+	if ($result->num_rows > 0) {
+		// Start the session
+		$_SESSION['email'] = $email;
+
+		header("Location: dashboard.php");
+		exit();
+	} else {
+		$_SESSION['error'] = "Invalid email or password.";
+		header("Location: signin.php");
+		exit();
+	}
+}
+
+// Delete operation
+if (isset($_GET['delete'])) {
+	$id = $_GET['delete'];
+
+	$sql = "DELETE FROM studentdata WHERE id=$id";
+
+	if ($conn->query($sql) === TRUE) {
+		$_SESSION['success'] = "Record deleted successfully.";
+		header("Location: dashboard.php");
+		exit();
+	} else {
+		$_SESSION['error'] = "Error deleting record: " . $conn->error;
+		header("Location: dashboard.php");
+		exit();
+	}
+}
+
+// Close the database connection
+$conn->close();
+?>

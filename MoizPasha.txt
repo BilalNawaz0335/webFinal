@@ -1,0 +1,148 @@
+link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="stylelogin.css">
+<link rel="icon" href="logoB.png" type="image/png" sizes="16x16">
+<?php
+ 
+if (isset($_REQUEST['signin'])) 
+{
+    $isConnected = mysqli_connect('localhost', 'saimzafar', 'saimzafar', 'Breakers');
+    
+    $username = mysqli_real_escape_string($isConnected, $_REQUEST['username']);
+    $password = mysqli_real_escape_string($isConnected, $_REQUEST['password']);
+
+    if ($isConnected)
+    {
+            $db = mysqli_select_db($isConnected,"Breakers");
+            $query = "select * from user where username = '$username'";
+            $query_run = mysqli_query($isConnected,$query);
+            if (!empty($query_run)&&$query_run->num_rows>0) 
+            {
+                $row = mysqli_fetch_assoc($query_run);
+                if($row['username'] == $username)
+                {
+                    if($row['password'] == $password)
+                    {
+                        session_id("1");
+                        session_start();
+                        $_SESSION['username'] = $row['username'];
+                        $_SESSION['email'] = $row['email'];
+                        $_SESSION['fullname'] = $row['full_name'];
+                        
+                        header("Location: index.php");
+                        
+                    }
+                    else
+                    {
+                        echo '<script>alert("Wrong Password!!!")</script>';
+                    }
+                }
+                else
+                {
+                    echo '<script>alert("Wrong Email or User Name")</script>';
+                }
+            }
+            else
+            {
+                echo '<div class="login-box">
+                <p>user doesn`t exist</p>
+                </div>';
+            
+            }
+    }
+}
+else if (isset($_REQUEST['signup'])) 
+{
+
+    $isConnected = mysqli_connect('localhost', 'saimzafar', 'saimzafar', 'Breakers');
+    $fullname = mysqli_real_escape_string($isConnected, $_REQUEST['fullname']);
+    $username = mysqli_real_escape_string($isConnected, $_REQUEST['username']);
+    $email = mysqli_real_escape_string($isConnected, $_REQUEST['email']);
+    $password = mysqli_real_escape_string($isConnected, $_REQUEST['password']);
+
+    if (empty($_REQUEST['fullname']) || empty($_REQUEST['username']) || empty($_REQUEST['email']) || empty($_REQUEST['password'])) 
+    {
+        echo "Incomplete Data ";
+    } 
+    else
+    {
+        if ($isConnected)
+         {
+            $sqlquery ="SELECT * from user where `username` = '$username'";
+            $sqlquery1 ="SELECT * from user where `email` = '$email'";
+            
+            $res=mysqli_query($isConnected, $sqlquery);
+            $res1=mysqli_query($isConnected, $sqlquery1);
+
+            if((!empty($res)&& $res->num_rows>0)||(!empty($res1)&& $res1->num_rows>0))
+            {
+                if(!empty($res)&& $res->num_rows>0)
+                {
+                    echo '<div class="login-box">
+                    <p>username already taken</p>
+                    </div>';
+                }
+                else if(!empty($res1)&& $res1->num_rows>0)
+                {
+                    echo '<div class="login-box">
+                    <p>this email is already in use</p>
+                    </div>';
+                }
+            }
+            else
+            {
+                $sqlquery = "Insert into user values('$fullname','$username','$email','$password')";
+                if (mysqli_query($isConnected, $sqlquery)) 
+                {            
+                    echo '<div class="login-box">
+                    <p>user successfully signed up  </p>
+                    </div>';
+                } 
+                else
+                {                
+                    echo '<div class="login-box">
+                    <p>failed to signup .(error)</p>' . mysqli_error($isConnected).'
+                    </div>';
+                }
+            }
+        } 
+        else
+         {
+            echo "database not connected(error=" . mysqli_connect_error() . ")";
+         }
+    }
+
+}
+else if($_REQUEST["signout"])
+{
+    session_start();
+    unset($_SESSION['username']);
+    unset($_SESSION['fullname']);
+    unset($_SESSION['email']);
+    session_destroy();
+    header("Location: index.php");
+
+}
+
+
+?>
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Breakers - Login page</title>
+
+
+</head>
+
+<body>
+    <div class="header">
+        <a href="index.php" class="hlogo"><img src="logoW.png" alt="logo pic" height="90" width="90"></a>
+    </div>
+
+</body>
+
+</html>
