@@ -1,0 +1,11 @@
+The first thing I learnt is the compilation safeguards that if there are multiple header files containing repeated inclusion of other headers
+then by using compilation safeguards we can avoid repeating of inclusion. Secondly, dividing problem into sub problems 
+like as we were asked in first task to make modules from given main.cpp this kind of strategies helps our codes to be reused.
+However, I also faced difficulty in compiling first task where built in function strstr caused an error. 
+The last task was somehow challenging where I have 
+to decide what functions to make to complete it. I also found difficulty in matching the expected output so I made a function named as sortList() which sorted the 
+list and I could easily print the GPA in ascending order. 
+Moreover, I made separate functions to entertain queries like greater, less, equal, and not equal. 
+These functions were made to find index of starting and ending of each list to be printed against the input. To print them, I made a function named as DisplayList() which takes 
+three parameters start, end and records to be printed. Lastly, I also kept a size of list by making a global variable named as records. I kept all the user related 
+inputs in UI.h an UI.cpp where I also validated the operation.
